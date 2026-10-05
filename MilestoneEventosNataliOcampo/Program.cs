@@ -1,8 +1,16 @@
+using Microsoft.EntityFrameworkCore;
+using MilestoneEventosNataliOcampo.data.Db;
+using MilestoneEventosNataliOcampo.data.Repositorios;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddDbContext<DbTurnoContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<ITurnoRepository, TurnoRepository>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
