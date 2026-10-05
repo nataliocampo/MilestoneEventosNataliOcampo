@@ -13,6 +13,14 @@ builder.Services.AddDbContext<DbTurnoContext>(options =>
 builder.Services.AddScoped<ITurnoRepository, TurnoRepository>();
 var app = builder.Build();
 
+//aplicar en nueva bd migraciones
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<DbTurnoContext>();
+    db.Database.Migrate();
+}
+
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
