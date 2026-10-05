@@ -16,7 +16,6 @@
 
   <ItemGroup>
     <Folder Include="Inyecciones\" />
-    <Folder Include="Migraciones\" />
   </ItemGroup>
 
 </Project>
