@@ -28,7 +28,7 @@ namespace MilestoneEventosNataliOcampo.web.Models
         [Required(ErrorMessage = "Campo Requerido")]
         public int EspecialidadId { get; set; }      
 
-        public List<SelectListItem> Especialidades { get; set; }
+        public List<SelectListItem> ? Especialidades { get; set; }
     }
 
     public class PacienteVM
