@@ -1,0 +1,46 @@
+@model IEnumerable<MilestoneEventosNataliOcampo.web.Models.TurnosVM>
+
+@{
+	ViewData["Title"] = "Turnos";
+}
+
+<h1>Turnos</h1>
+
+<p>
+	<a asp-action="Create" class="btn btn-primary">Crear nuevo</a>
+</p>
+
+@if (Model == null || !Model.Any())
+{
+	<p>No hay turnos para mostrar.</p>
+}
+else
+{
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>Código</th>
+				<th>Paciente</th>
+				<th>Fecha</th>
+				<th>Especialidad</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+		@foreach (var item in Model)
+		{
+			<tr>
+				<td>@item.CodigoTurno</td>
+				<td>@(item.Paciente?.Nombre) @(" ") @(item.Paciente?.Apellido) (@item.Paciente?.DNI)</td>
+				<td>@item.FechaTurno.ToString("g")</td>
+				<td>@item.Especialidad</td>
+				<td>
+					<a asp-action="Details" asp-route-CodigoTurno="@item.CodigoTurno">Detalles</a> |
+					<a asp-action="Edit" asp-route-CodigoTurno="@item.CodigoTurno">Editar</a> |
+					<a asp-action="Delete" asp-route-CodigoTurno="@item.CodigoTurno">Eliminar</a>
+				</td>
+			</tr>
+		}
+		</tbody>
+	</table>
+}

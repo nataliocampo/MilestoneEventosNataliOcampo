@@ -1,0 +1,59 @@
+@model MilestoneEventosNataliOcampo.web.Models.TurnoAltaVM
+
+@{
+	ViewData["Title"] = "Editar turno";
+}
+
+<h1>Editar turno</h1>
+
+@if (ViewBag.Mensaje != null)
+{
+	<div class="alert alert-warning">@ViewBag.Mensaje</div>
+}
+
+<form asp-action="Edit" method="post">
+	<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+	<input asp-for="CodigoTurno" type="hidden" />
+
+	<div class="form-group">
+		<label asp-for="Paciente.Nombre" class="control-label"></label>
+		<input asp-for="Paciente.Nombre" class="form-control" />
+		<span asp-validation-for="Paciente.Nombre" class="text-danger"></span>
+	</div>
+
+	<div class="form-group">
+		<label asp-for="Paciente.Apellido" class="control-label"></label>
+		<input asp-for="Paciente.Apellido" class="form-control" />
+		<span asp-validation-for="Paciente.Apellido" class="text-danger"></span>
+	</div>
+
+	<div class="form-group">
+		<label asp-for="Paciente.DNI" class="control-label"></label>
+		<input asp-for="Paciente.DNI" class="form-control" />
+		<span asp-validation-for="Paciente.DNI" class="text-danger"></span>
+	</div>
+
+	<div class="form-group">
+		<label asp-for="FechaTurno" class="control-label"></label>
+		<input asp-for="FechaTurno" class="form-control" />
+		<span asp-validation-for="FechaTurno" class="text-danger"></span>
+	</div>
+
+	<div class="form-group">
+		<label asp-for="EspecialidadId" class="control-label"></label>
+		<select asp-for="EspecialidadId" asp-items="Model.Especialidades" class="form-control">
+			<option value="">-- Seleccione --</option>
+		</select>
+		<span asp-validation-for="EspecialidadId" class="text-danger"></span>
+	</div>
+
+	<div class="form-group">
+		<input type="submit" value="Guardar" class="btn btn-primary" />
+		<a asp-action="Index" class="btn btn-secondary">Volver al listado</a>
+	</div>
+</form>
+
+@section Scripts {
+	@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
