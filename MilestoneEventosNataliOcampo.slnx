@@ -1,3 +1,4 @@
 <Solution>
-  <Project Path="MilestoneEventosNataliOcampo/MilestoneEventosNataliOcampo.csproj" />
+  <Project Path="MilestoneEventosNataliOcampo.data/MilestoneEventosNataliOcampo.data.csproj" Id="845695b8-48c0-4315-9975-e5da78ec3595" />
+  <Project Path="MilestoneEventosNataliOcampo/MilestoneEventosNataliOcampo.web.csproj" />
 </Solution>

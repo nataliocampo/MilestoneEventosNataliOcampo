@@ -7,7 +7,7 @@ namespace MilestoneEventosNataliOcampo.web.Models
     public class TurnosVM
     {
         public int CodigoTurno { get; set; }
-        public string Paciente { get; set; }
+        public PacienteVM Paciente { get; set; }
         public DateTime FechaTurno{ get; set; }
 
         public string Especialidad { get; set; }    
@@ -15,6 +15,7 @@ namespace MilestoneEventosNataliOcampo.web.Models
 
     public class TurnoAltaVM
     {
+        public int CodigoTurno { get; set; }
 
         [Required(ErrorMessage = "Campo Requerido")]
 

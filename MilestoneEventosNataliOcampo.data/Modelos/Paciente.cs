@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Net;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
+
 
 namespace MilestoneEventosNataliOcampo.data.Modelos
 {
-    internal class Paciente
+    public class Paciente
     {
         [Key]
         public int Id { get; set; }

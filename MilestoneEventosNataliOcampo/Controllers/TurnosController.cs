@@ -31,9 +31,14 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
 
             turnosddbb = turnosddbb.Where(t => t.Borrado == false).ToList();
 
-            Turnos = turnosddbb.Select(t => new TurnosVM { CodigoTurno = t.CodigoTurno, FechaTurno = t.FechaTurno,
-                Paciente = new Paciente{Nombre = t.Paciente.Nombre, Apellido = t.Paciente.Apellido ,DNI= t.Paciente.DNI}
-                , Especialidad= t.Especialidad.Nombre}).ToList();
+            Turnos = turnosddbb.Select(t => new TurnosVM
+            {
+                CodigoTurno = t.CodigoTurno,
+                FechaTurno = t.FechaTurno,
+                Paciente = new PacienteVM { Nombre = t.Paciente.Nombre, Apellido = t.Paciente.Apellido, DNI = t.Paciente.DNI }
+                ,
+                Especialidad = t.Especialidad.Nombre
+            }).ToList();
             return View(Turnos);
         }
 
@@ -45,14 +50,18 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
 
             var turnosddbb = _turnoRepository.ObtenerTurnoId(CodigoTurno);
 
-            turno = new TurnosVM { CodigoTurno = turnosddbb.CodigoTurno,
-                Paciente = new Paciente { Nombre = turnosddbb.Paciente.Nombre, Apellido = turnosddbb.Paciente.Apellido, DNI = turnosddbb.Paciente.DNI },
-                FechaTurno = turnosddbb.FechaTurno, Especialidad = turnosddbb.Especialidad.Nombre };
+            turno = new TurnosVM
+            {
+                CodigoTurno = turnosddbb.CodigoTurno,
+                Paciente = new PacienteVM { Nombre = turnosddbb.Paciente.Nombre, Apellido = turnosddbb.Paciente.Apellido, DNI = turnosddbb.Paciente.DNI },
+                FechaTurno = turnosddbb.FechaTurno,
+                Especialidad = turnosddbb.Especialidad.Nombre
+            };
 
             return View(turno);
         }
-           
-        
+
+
         //crear  get 
         public ActionResult Create()
         {
@@ -91,9 +100,13 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
 
 
                 Turno turno = new Turno();
+                turno.FechaTurno = turnoNuevo.FechaTurno;
+                turno.EspecialidadId = turnoNuevo.EspecialidadId;
+                turno.PacienteId = pacienteNuevo.Id;
 
-                _turnoRepository.AgregarTurno{ turno.FechaTurno = turnoNuevo.FechaTurno, turno.EspecialidadId = turnoNuevo.EspecialidadId, turno.PacienteId = pacienteNuevo.Id}
-                ;
+                _turnoRepository.AgregarTurno(turno);
+
+
 
                 TempData["Mensaje"] = "Turno creado con exito";
 
@@ -111,10 +124,17 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
         // modificar 
         public ActionResult Edit(int CodigoTurno)
         {
-            Turno turnoModificar = null;
-
-            var turnosddbb = _turnoRepository.Modificar(CodigoTurno);
-            turnoModificar = new TurnosVM { FechaTurno = turnosddbb.FechaTurno, Especialidad = turnosddbb.EspecialidadId, Paciente = turnosddbb.Paciente };
+            var turnosddbb = _turnoRepository.ObtenerTurnoId(CodigoTurno);
+            TurnoAltaVM turnoModificar = new TurnoAltaVM
+            {
+                CodigoTurno = turnosddbb.CodigoTurno,
+                FechaTurno = turnosddbb.FechaTurno,
+                EspecialidadId = turnosddbb.EspecialidadId,
+                Paciente = new PacienteVM { Nombre = turnosddbb.Paciente.Nombre, Apellido = turnosddbb.Paciente.Apellido, DNI = turnosddbb.Paciente.DNI },
+                Especialidades = _turnoRepository.ObtenerEspecialidades()
+                    .Select(e => new SelectListItem(e.Nombre, e.Id.ToString()))
+                    .ToList()
+            };
 
             return View(turnoModificar);
         }
@@ -122,15 +142,30 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
 
-        public ActionResult Edit(int CodigoTurno, TurnosVM turnoNuevo)
+        public ActionResult Edit(int CodigoTurno, TurnoAltaVM turnoNuevo)
         {
+
+            if (!ModelState.IsValid)
+            {
+                turnoNuevo.Especialidades = _turnoRepository.ObtenerEspecialidades()
+                    .Select(e => new SelectListItem(e.Nombre, e.Id.ToString()))
+                    .ToList();
+
+
+                ViewBag.Mensaje = "Error - debe  completar los campos requeridos";
+                return View(turnoNuevo);
+            }
+
             try
             {
-                Turno turnoModificar = new Turno();
+                var turnoModificar = _turnoRepository.ObtenerTurnoId(CodigoTurno);
 
-                turnoModificar = new TurnosVM { FechaTurno = turnoNuevo.FechaTurno, Especialidad = turnoNuevo.EspecialidadId, Paciente = turnoNuevo.Paciente };
+                turnoModificar.FechaTurno = turnoNuevo.FechaTurno;
+                turnoModificar.EspecialidadId = turnoNuevo.EspecialidadId;
 
                 _turnoRepository.Modificar(turnoModificar);
+
+                TempData["Mensaje"] = "Turno modificado";
                 return RedirectToAction(nameof(Index));
             }
             catch
@@ -141,11 +176,15 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
         //"eliminar"
         public ActionResult Delete(int CodigoTurno)
         {
-            Turno turno = new Turno();
-
             var turnosddbb = _turnoRepository.ObtenerTurnoId(CodigoTurno);
-            turno = new TurnosVM { FechaTurno = turno.FechaTurno };
-
+            TurnosVM turno = new TurnosVM
+            {
+                CodigoTurno = turnosddbb.CodigoTurno,
+                FechaTurno = turnosddbb.FechaTurno,
+                Paciente = new PacienteVM { Nombre = turnosddbb.Paciente.Nombre, Apellido = turnosddbb.Paciente.Apellido, DNI = turnosddbb.Paciente.DNI }
+                ,
+                Especialidad = turnosddbb.Especialidad.Nombre
+            };
 
             return View(turno);
         }
@@ -158,8 +197,8 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
             try
             {
                 var turnosddbb = _turnoRepository.ObtenerTurnoId(CodigoTurno);
-                Turno.Borrado = true;
-                _turnoRepository.ActualizarEvento(CodigoTurno);
+                turnosddbb.Borrado = true;
+                _turnoRepository.Modificar(turnosddbb);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -168,7 +207,5 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
                 return View();
             }
         }
-    }
-}
-      
+    }   
 }

@@ -7,7 +7,7 @@ using System.Text;
 
 namespace MilestoneEventosNataliOcampo.data.Db
 {
-    public class DbTurnoContext :DbContext
+    public class DbTurnoContext : DbContext
     {
 
         public DbTurnoContext(DbContextOptions<DbTurnoContext> options) : base(options) { }
