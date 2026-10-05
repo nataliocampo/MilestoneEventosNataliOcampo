@@ -7,12 +7,12 @@
 <h1>Crear turno</h1>
 @if (!ViewData.ModelState.IsValid)
 {
-	<div class="alert alert-danger">
-		@foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-		{
-			<p>@error.ErrorMessage</p>
-		}
-	</div>
+    <div class="alert alert-danger">
+        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+        {
+            <p>@error.ErrorMessage</p>
+        }
+    </div>
 }
 
 @if (ViewBag.Mensaje != null)
@@ -22,7 +22,7 @@
 
 <form asp-action="Create" method="post">
 	<div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
+	<h5 class="mt-4">Datos del paciente</h5>
 	<div class="form-group">
 		<label asp-for="Paciente.Nombre" class="control-label"></label>
 		<input asp-for="Paciente.Nombre" class="form-control" />
