@@ -15,6 +15,9 @@ namespace MilestoneEventosNataliOcampo.data.Modelos
         [Column(TypeName = "Date")]
         public DateTime FechaTurno { get; set; }
 
+        [Column(TypeName = "time")]
+        public TimeOnly HoraTurno { get; set; }
+
         [Required]
         public int EspecialidadId { get; set; }
 
