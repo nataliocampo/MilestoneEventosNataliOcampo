@@ -17,7 +17,7 @@ namespace MilestoneEventosNataliOcampo.data.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.12")
+                .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -109,6 +109,9 @@ namespace MilestoneEventosNataliOcampo.data.Migrations
 
                     b.Property<DateTime>("FechaTurno")
                         .HasColumnType("Date");
+
+                    b.Property<TimeOnly>("HoraTurno")
+                        .HasColumnType("time");
 
                     b.Property<int>("PacienteId")
                         .HasColumnType("int");
