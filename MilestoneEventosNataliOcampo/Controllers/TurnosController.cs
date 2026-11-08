@@ -74,6 +74,8 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
             .Select(h => new SelectListItem(h.ToString("HH:mm"), h.ToString("HH:mm")))
             .ToList();
 
+            //devuelve a la vista la fecha de hoy 
+            turno.FechaTurno = DateTime.Today;
 
             return View(turno);
         }
@@ -110,7 +112,7 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
 
 
                 Turno turno = new Turno();
-        turno.FechaTurno = turnoNuevo.FechaTurno;
+                turno.FechaTurno = turnoNuevo.FechaTurno;
                 turno.EspecialidadId = turnoNuevo.EspecialidadId;
                 turno.PacienteId = pacienteNuevo.Id;
                 turno.HoraTurno = turnoNuevo.HoraTurno;
