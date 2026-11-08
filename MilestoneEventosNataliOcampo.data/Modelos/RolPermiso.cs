@@ -4,9 +4,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Net;
 using System.Text;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace MilestoneEventosNataliOcampo.data.Modelos
 {
+    [PrimaryKey("RolId", "PermisoId")]
+
     public class RolPermiso
     {
             [ForeignKey("RolId")]
