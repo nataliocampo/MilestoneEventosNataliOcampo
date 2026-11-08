@@ -54,6 +54,12 @@ namespace MilestoneEventosNataliOcampo.data.Repositorios
          .ToList();
         }
 
+        public bool FechaValida(DateTime fecha, TimeOnly hora)
+        {
+            DateTime fechaHoraTurno = fecha.Date + hora.ToTimeSpan();
+
+            return fechaHoraTurno >= DateTime.Now;
+        }
         public Turno ObtenerTurnoId(int CodigoTurno)
         {
             return _context.Turnos

@@ -97,10 +97,30 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
                     .ToList();
 
                 ViewBag.Mensaje = "Error - debe  completar los campos requeridos";
+
+
                 return View(turnoNuevo);
             }
 
-        
+            //Si no valida;
+            if (!_turnoRepository.FechaValida(turnoNuevo.FechaTurno, turnoNuevo.HoraTurno))
+            {
+                ModelState.AddModelError(nameof(turnoNuevo.FechaTurno),
+                    "No se puede elegir una fecha y hora anterior a la actual.");
+
+                turnoNuevo.Especialidades = _turnoRepository.ObtenerEspecialidades()
+                    .Select(e => new SelectListItem(e.Nombre, e.Id.ToString()))
+                    .ToList();
+
+                turnoNuevo.Horarios = _turnoRepository.Horarios()
+                    .Select(h => new SelectListItem(h.ToString("HH:mm"), h.ToString("HH:mm")))
+                    .ToList();
+
+                return View(turnoNuevo);
+            }
+
+
+
             try
             {
                 Paciente pacienteNuevo = new Paciente();
@@ -117,14 +137,18 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
                 turno.PacienteId = pacienteNuevo.Id;
                 turno.HoraTurno = turnoNuevo.HoraTurno;
 
+                _turnoRepository.AgregarTurno(turno);
+
+
+
+                TempData["Mensaje"] = "Turno creado con exito";
                 return RedirectToAction(nameof(Index));
 
-    }
+            }
             catch
             {
                 return View();
-}
-
+            }
         }
 
 

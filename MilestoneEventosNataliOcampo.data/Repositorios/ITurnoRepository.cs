@@ -12,6 +12,7 @@ namespace MilestoneEventosNataliOcampo.data.Repositorios
         void AgregarPaciente(Paciente paciente);
         List<Especialidad> ObtenerEspecialidades();
 
+        bool FechaValida(DateTime fecha, TimeOnly hora);
         List<TimeOnly> Horarios();
         Turno ObtenerTurnoId(int CodigoTurno);
         List<Turno> ObtenerTurnos();
