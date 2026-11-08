@@ -9,10 +9,6 @@ namespace MilestoneEventosNataliOcampo.data.Modelos
 {
     public class RolPermiso
     {
-        namespace MilestoneEventosNataliOcampo.data.Modelos
-    {
-        public class RolPermiso
-        {
             [ForeignKey("RolId")]
             public Rol Rol { get; set; }
 
@@ -27,4 +23,3 @@ namespace MilestoneEventosNataliOcampo.data.Modelos
 
         }
     }
-}
