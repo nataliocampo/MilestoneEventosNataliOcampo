@@ -12,7 +12,7 @@ namespace MilestoneEventosNataliOcampo.data.Db
 
         public DbTurnoContext(DbContextOptions<DbTurnoContext> options) : base(options) { }
 
-
+            public DbSet<Medico> Medicos => Set<Medico>();
             public DbSet<Usuario> Usuarios => Set<Usuario>();
 
             public DbSet<RolPermiso> RolPermiso => Set<RolPermiso>();
@@ -29,6 +29,11 @@ namespace MilestoneEventosNataliOcampo.data.Db
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Turno>()
+                    .HasOne(t => t.Medico)
+                    .WithMany(m => m.Turnos)
+                    .HasForeignKey(t => t.MedicoId)
+                    .OnDelete(DeleteBehavior.Restrict);
             modelBuilder.Entity<Especialidad>().HasData(
                 new Especialidad { Id = 1, Nombre = "Clínica Médica" },
                 new Especialidad { Id = 2, Nombre = "Pediatría" },
@@ -41,7 +46,6 @@ namespace MilestoneEventosNataliOcampo.data.Db
                 new Rol { RolId = 2, NombreRol = "Paciente" }
                 );
 
-            //recurso accion 
             modelBuilder.Entity<Permiso>().HasData(
                 new Permiso { Id = 1, NombrePermiso = "Turnos.VerTodos" },
                 new Permiso { Id = 2, NombrePermiso = "Turnos.Crear" },
@@ -59,9 +63,18 @@ namespace MilestoneEventosNataliOcampo.data.Db
                 new RolPermiso { PermisoId = 5, RolId = 2 }
                 );
 
+            modelBuilder.Entity<Medico>()
+                .HasIndex(m => m.UsuarioId).IsUnique();
 
+            modelBuilder.Entity<Paciente>()
+                .HasIndex(p => p.UsuarioId).IsUnique();
 
-
+            // No acepta pacientes con el mismo DNI
+            modelBuilder.Entity<Paciente>()
+                .HasIndex(p => p.DNI).IsUnique();
         }
+
+
+    
     }
 }

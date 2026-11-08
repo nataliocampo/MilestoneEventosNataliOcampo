@@ -19,7 +19,8 @@ namespace MilestoneEventosNataliOcampo.data.Modelos
         [Required]
         [StringLength(50)]
         public string Apellido { get; set; }
-
+        public int UsuarioId { get; set; }
+        public Usuario Usuario { get; set; } = null!;
 
     }
 }

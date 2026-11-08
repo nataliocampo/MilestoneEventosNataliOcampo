@@ -33,7 +33,7 @@ namespace MilestoneEventosNataliOcampo.data.Modelos
         [Column(TypeName = "bit")]
         public bool Borrado { get; set; }
 
-        [ForeignKey("PacienteId")]
+        [ForeignKey("MedicoId")]
 
         public int MedicoId { get; set; }
         public Medico Medico { get; set; } = null!;
