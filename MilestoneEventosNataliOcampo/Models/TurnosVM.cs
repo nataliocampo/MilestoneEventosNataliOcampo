@@ -8,7 +8,7 @@ namespace MilestoneEventosNataliOcampo.web.Models
     {
         public int CodigoTurno { get; set; }
         public PacienteVM Paciente { get; set; }
-        public DateTime FechaTurno{ get; set; }
+        public DateTime FechaTurno { get; set; }
 
         public string Especialidad { get; set; }    
     }
@@ -23,6 +23,13 @@ namespace MilestoneEventosNataliOcampo.web.Models
 
         [Required(ErrorMessage = "Campo Requerido")]
         public DateTime FechaTurno { get; set; }
+
+
+        //Hora de turno control de separado de fecha y un desplegable de horarios, cada uno con su campo.
+        [Required(ErrorMessage = "Campo Requerido")]
+        public TimeOnly HoraTurno { get; set; }
+
+        public List<SelectListItem> ? Horarios { get; set; }
 
 
         [Required(ErrorMessage = "Campo Requerido")]

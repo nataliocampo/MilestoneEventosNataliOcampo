@@ -19,6 +19,22 @@ namespace MilestoneEventosNataliOcampo.data.Repositorios
         }
 
 
+        public List<TimeOnly> Horarios()
+        {
+            List<TimeOnly> horarios = new List<TimeOnly>();
+
+            TimeOnly horaI = new TimeOnly(9, 0);
+            TimeOnly horaFinal = new TimeOnly(17, 30);
+
+            while (horaI <= horaFinal)
+            {
+                horarios.Add(horaI);
+                horaI = horaI.AddMinutes(30);
+            }
+
+            return horarios;
+        }
+
         public void AgregarPaciente(Paciente paciente)
         {
             _context.Pacientes.Add(paciente);

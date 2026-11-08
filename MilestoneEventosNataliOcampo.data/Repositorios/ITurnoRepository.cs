@@ -11,10 +11,14 @@ namespace MilestoneEventosNataliOcampo.data.Repositorios
        void AgregarTurno(Turno turno);
         void AgregarPaciente(Paciente paciente);
         List<Especialidad> ObtenerEspecialidades();
+
+        List<TimeOnly> Horarios();
         Turno ObtenerTurnoId(int CodigoTurno);
         List<Turno> ObtenerTurnos();
         void Modificar(Turno turno);
         void Eliminar(int id);
+
+
 
     }
 }
