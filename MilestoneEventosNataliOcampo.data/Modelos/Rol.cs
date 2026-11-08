@@ -10,10 +10,9 @@ namespace MilestoneEventosNataliOcampo.data.Modelos
     {
 
         [Key]
-        public int RolId { get; }
+        public int RolId { get; set; }
 
-        [Column(TypeName = "String")]
-        public String NombreRol { get; }
+        public String NombreRol { get; set; }
 
 
     }

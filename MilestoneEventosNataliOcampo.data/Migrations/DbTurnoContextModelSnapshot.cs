@@ -93,6 +93,121 @@ namespace MilestoneEventosNataliOcampo.data.Migrations
                     b.ToTable("Pacientes");
                 });
 
+            modelBuilder.Entity("MilestoneEventosNataliOcampo.data.Modelos.Permiso", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("NombrePermiso")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Permiso");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            NombrePermiso = "Turnos.VerTodos"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            NombrePermiso = "Turnos.Crear"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            NombrePermiso = "Turnos.Editar"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            NombrePermiso = "Turnos.Eliminar"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            NombrePermiso = "Turnos.VerPropios"
+                        });
+                });
+
+            modelBuilder.Entity("MilestoneEventosNataliOcampo.data.Modelos.Rol", b =>
+                {
+                    b.Property<int>("RolId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RolId"));
+
+                    b.Property<string>("NombreRol")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("RolId");
+
+                    b.ToTable("Rol");
+
+                    b.HasData(
+                        new
+                        {
+                            RolId = 1,
+                            NombreRol = "Medico"
+                        },
+                        new
+                        {
+                            RolId = 2,
+                            NombreRol = "Paciente"
+                        });
+                });
+
+            modelBuilder.Entity("MilestoneEventosNataliOcampo.data.Modelos.RolPermiso", b =>
+                {
+                    b.Property<int>("RolId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PermisoId")
+                        .HasColumnType("int");
+
+                    b.HasKey("RolId", "PermisoId");
+
+                    b.HasIndex("PermisoId");
+
+                    b.ToTable("RolPermiso");
+
+                    b.HasData(
+                        new
+                        {
+                            RolId = 1,
+                            PermisoId = 1
+                        },
+                        new
+                        {
+                            RolId = 2,
+                            PermisoId = 2
+                        },
+                        new
+                        {
+                            RolId = 2,
+                            PermisoId = 3
+                        },
+                        new
+                        {
+                            RolId = 2,
+                            PermisoId = 4
+                        },
+                        new
+                        {
+                            RolId = 2,
+                            PermisoId = 5
+                        });
+                });
+
             modelBuilder.Entity("MilestoneEventosNataliOcampo.data.Modelos.Turno", b =>
                 {
                     b.Property<int>("CodigoTurno")
@@ -125,6 +240,56 @@ namespace MilestoneEventosNataliOcampo.data.Migrations
                     b.ToTable("Turnos");
                 });
 
+            modelBuilder.Entity("MilestoneEventosNataliOcampo.data.Modelos.Usuario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("PacienteId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("RolId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PacienteId");
+
+                    b.HasIndex("RolId");
+
+                    b.ToTable("Usuarios");
+                });
+
+            modelBuilder.Entity("MilestoneEventosNataliOcampo.data.Modelos.RolPermiso", b =>
+                {
+                    b.HasOne("MilestoneEventosNataliOcampo.data.Modelos.Permiso", "Permiso")
+                        .WithMany()
+                        .HasForeignKey("PermisoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MilestoneEventosNataliOcampo.data.Modelos.Rol", "Rol")
+                        .WithMany()
+                        .HasForeignKey("RolId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Permiso");
+
+                    b.Navigation("Rol");
+                });
+
             modelBuilder.Entity("MilestoneEventosNataliOcampo.data.Modelos.Turno", b =>
                 {
                     b.HasOne("MilestoneEventosNataliOcampo.data.Modelos.Especialidad", "Especialidad")
@@ -142,6 +307,23 @@ namespace MilestoneEventosNataliOcampo.data.Migrations
                     b.Navigation("Especialidad");
 
                     b.Navigation("Paciente");
+                });
+
+            modelBuilder.Entity("MilestoneEventosNataliOcampo.data.Modelos.Usuario", b =>
+                {
+                    b.HasOne("MilestoneEventosNataliOcampo.data.Modelos.Paciente", "Paciente")
+                        .WithMany()
+                        .HasForeignKey("PacienteId");
+
+                    b.HasOne("MilestoneEventosNataliOcampo.data.Modelos.Rol", "Rol")
+                        .WithMany()
+                        .HasForeignKey("RolId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Paciente");
+
+                    b.Navigation("Rol");
                 });
 #pragma warning restore 612, 618
         }

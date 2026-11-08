@@ -10,7 +10,7 @@ namespace MilestoneEventosNataliOcampo.data.Modelos
     {
 
         [Key]
-        public int Id { get; }
+        public int Id { get; set; }
         public String NombrePermiso { get; set; }
           
 
