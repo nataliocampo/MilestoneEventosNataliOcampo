@@ -19,7 +19,7 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
         {
             return View();
         }
-
+       
 
         public async Task Login()
         {
@@ -71,7 +71,7 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 principal);
 
-            return RedirectToAction("Index");
+            return RedirectToAction("Index", "Home");
             
         }
 
@@ -82,7 +82,7 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return View("Index");
+            return View("Index", "Home");
         }
     }
 
