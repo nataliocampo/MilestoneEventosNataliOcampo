@@ -4,6 +4,7 @@ using MilestoneEventosNataliOcampo.data.Modelos;
 using MilestoneEventosNataliOcampo.data.Repositorios;
 using MilestoneEventosNataliOcampo.web.Models;
 using System.Diagnostics;
+using System.Security.Claims;
 using System.Xml.Linq;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -13,6 +14,7 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
     public class TurnosController : Controller
     {
         private ITurnoRepository _turnoRepository;
+        private IUsuarioRepository _usuarioRepository;
 
         public TurnosController(ITurnoRepository turnoRepository)
         {
@@ -80,22 +82,41 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
             return View(turno);
         }
 
+        private void CargarSelector(TurnoAltaVM turnovm)
+        {
+            turnovm.Especialidades = _turnoRepository.ObtenerEspecialidades()
+                .Select(e => new SelectListItem(e.Nombre, e.Id.ToString()))
+                .ToList();
+
+            turnovm.Horarios = _turnoRepository.Horarios()
+                .Select(h => new SelectListItem(h.ToString("HH:mm"), h.ToString("HH:mm")))
+                .ToList();
+        }
+
+
         //crear post 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Create(TurnoAltaVM turnoNuevo)
         {
+
+            if (!int.TryParse(User.FindFirstValue("Id"), out int usuarioId))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            Paciente? pacienteExistente = _turnoRepository.BuscarPacienteXusuario(usuarioId);
+
+            if (pacienteExistente != null)
+            {
+                ModelState.Remove("Paciente.Nombre");
+                ModelState.Remove("Paciente.Apellido");
+                ModelState.Remove("Paciente.DNI");
+            }
+
             if (!ModelState.IsValid)
             {
-                turnoNuevo.Especialidades = _turnoRepository.ObtenerEspecialidades()
-                    .Select(e => new SelectListItem(e.Nombre, e.Id.ToString()))
-                    .ToList();
-
-
-                turnoNuevo.Horarios = _turnoRepository.Horarios()
-                    .Select(h => new SelectListItem(h.ToString("HH:mm"), h.ToString("HH:mm")))
-                    .ToList();
-
+                CargarSelector(turnoNuevo);
                 ViewBag.Mensaje = "Error - debe  completar los campos requeridos";
 
 
@@ -108,14 +129,19 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
                 ModelState.AddModelError(nameof(turnoNuevo.FechaTurno),
                     "No se puede elegir una fecha y hora anterior a la actual.");
 
-                turnoNuevo.Especialidades = _turnoRepository.ObtenerEspecialidades()
-                    .Select(e => new SelectListItem(e.Nombre, e.Id.ToString()))
-                    .ToList();
+                CargarSelector(turnoNuevo);
 
-                turnoNuevo.Horarios = _turnoRepository.Horarios()
-                    .Select(h => new SelectListItem(h.ToString("HH:mm"), h.ToString("HH:mm")))
-                    .ToList();
+                return View(turnoNuevo);
+            }
 
+            // Buscar médico antes de asignar
+            Medico? medico = _turnoRepository.AsignarMedico(
+                turnoNuevo.EspecialidadId, turnoNuevo.FechaTurno, turnoNuevo.HoraTurno);
+
+            if (medico == null)
+            {
+                ModelState.AddModelError("", "No hay médicos disponibles para esa especialidad, fecha y hora.");
+                CargarSelector(turnoNuevo);
                 return View(turnoNuevo);
             }
 
@@ -123,23 +149,27 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
 
             try
             {
-                Paciente pacienteNuevo = new Paciente();
-                pacienteNuevo.Nombre = turnoNuevo.Paciente.Nombre;
-                pacienteNuevo.Apellido = turnoNuevo.Paciente.Apellido;
-                pacienteNuevo.DNI = turnoNuevo.Paciente.DNI;
+                if (pacienteExistente == null)
+                {
+                    Paciente pacienteNuevo = new Paciente {
+                        Nombre = turnoNuevo.Paciente.Nombre,
+                        Apellido = turnoNuevo.Paciente.Apellido,
+                        DNI = turnoNuevo.Paciente.DNI,
+                        UsuarioId = usuarioId
+                    };
 
-                _turnoRepository.AgregarPaciente(pacienteNuevo);
+                    _turnoRepository.AgregarPaciente(pacienteNuevo);
+                }
 
-
-                Turno turno = new Turno();
-                turno.FechaTurno = turnoNuevo.FechaTurno;
-                turno.EspecialidadId = turnoNuevo.EspecialidadId;
-                turno.PacienteId = pacienteNuevo.Id;
-                turno.HoraTurno = turnoNuevo.HoraTurno;
-
+                Turno turno = new Turno
+                {
+                    FechaTurno = turnoNuevo.FechaTurno,
+                    EspecialidadId = turnoNuevo.EspecialidadId,
+                    HoraTurno = turnoNuevo.HoraTurno,
+                    MedicoId = medico.Id
+                };
+                
                 _turnoRepository.AgregarTurno(turno);
-
-
 
                 TempData["Mensaje"] = "Turno creado con exito";
                 return RedirectToAction(nameof(Index));
@@ -147,7 +177,10 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
             }
             catch
             {
-                return View();
+                ModelState.AddModelError("", "No se pudo crear el turno. Intentá de nuevo.");
+                CargarSelector(turnoNuevo);
+                return View(turnoNuevo);
+
             }
         }
 
