@@ -8,7 +8,7 @@ namespace MilestoneEventosNataliOcampo.data.Repositorios
 {
     public interface ITurnoRepository
     {
-       void AgregarTurno(Turno turno);
+        void AgregarTurno(Turno turno);
         void AgregarPaciente(Paciente paciente);
         List<Especialidad> ObtenerEspecialidades();
 
@@ -19,7 +19,10 @@ namespace MilestoneEventosNataliOcampo.data.Repositorios
         void Modificar(Turno turno);
         void Eliminar(int id);
 
+        Paciente? BuscarPacienteXusuario(int Id);
 
-
+        Medico? AsignarMedico(int especialidadIdRequerida, DateTime fechaTurno, TimeOnly horaTurno);
     }
+
+       
 }

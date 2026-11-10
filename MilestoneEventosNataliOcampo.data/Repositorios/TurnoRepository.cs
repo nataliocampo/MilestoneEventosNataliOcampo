@@ -46,6 +46,25 @@ namespace MilestoneEventosNataliOcampo.data.Repositorios
         }
 
 
+        //Buscar si el usuario que inicio ya tenia paciente cargado, lo usa, si no debe crear paciente
+        public Paciente? BuscarPacienteXusuario(int usuarioId)
+        { 
+            return _context.Pacientes.FirstOrDefault(p => p.UsuarioId == usuarioId);
+        }
+
+        //Buscar medico disponible para asignar al turno
+        public Medico? AsignarMedico(int especialidadIdRequerida, DateTime fechaTurno, TimeOnly horaTurno)
+        {
+            return _context.Medicos.Where(m => m.EspecialidadId == especialidadIdRequerida
+            && !_context.Turnos.Any(t => t.MedicoId == m.Id
+                && t.FechaTurno == fechaTurno.Date
+                && t.HoraTurno == horaTurno
+                && !t.Borrado))
+        .OrderBy(m => m.Id)
+        .FirstOrDefault();
+        }
+        
+
         public List<Turno> ObtenerTurnos()
         {
             return _context.Turnos
