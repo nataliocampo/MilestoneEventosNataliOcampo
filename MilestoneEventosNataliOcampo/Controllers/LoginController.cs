@@ -82,7 +82,7 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return View("Index", "Home");
+            return RedirectToAction("Index", "Login");
         }
     }
 

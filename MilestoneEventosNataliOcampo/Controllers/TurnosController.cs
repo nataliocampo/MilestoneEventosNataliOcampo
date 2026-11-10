@@ -123,12 +123,6 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
 
             Paciente? paciente = _turnoRepository.BuscarPacienteXusuario(usuarioId);
 
-            //if (paciente != null)
-            //{
-            //    ModelState.Remove("Paciente.Nombre");
-            //    ModelState.Remove("Paciente.Apellido");
-            //    ModelState.Remove("Paciente.DNI");
-            //}
             if (paciente != null)
             {
                 var claves = ModelState.Keys
