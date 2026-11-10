@@ -84,7 +84,8 @@ namespace MilestoneEventosNataliOcampo.data.Repositorios
             return _context.Turnos
           .Include(t => t.Paciente)
          .Include(t => t.Especialidad)
-         .FirstOrDefault(t => t.CodigoTurno == CodigoTurno);
+         .Include(t => t.Medico).ThenInclude(m => m.Usuario)
+         .FirstOrDefault(t => t.CodigoTurno == CodigoTurno && !t.Borrado);
         }
 
         public void AgregarTurno(Turno turno)
@@ -108,7 +109,7 @@ namespace MilestoneEventosNataliOcampo.data.Repositorios
             var turno = _context.Turnos.Find(id);
             if (turno != null)
             {
-                _context.Turnos.Remove(turno);
+                turno.Borrado = true;
                 _context.SaveChanges();
             }
 

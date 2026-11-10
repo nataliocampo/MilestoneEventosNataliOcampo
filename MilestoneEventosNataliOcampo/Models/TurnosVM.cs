@@ -10,7 +10,10 @@ namespace MilestoneEventosNataliOcampo.web.Models
         public PacienteVM Paciente { get; set; }
         public DateTime FechaTurno { get; set; }
 
-        public string Especialidad { get; set; }    
+        public TimeOnly HoraTurno { get; set; }
+        public string Especialidad { get; set; }
+
+        public string Medico { get; set; } = "";
     }
 
     public class TurnoAltaVM

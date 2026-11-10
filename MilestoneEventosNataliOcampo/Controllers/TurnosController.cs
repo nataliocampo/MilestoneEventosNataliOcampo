@@ -5,8 +5,7 @@ using MilestoneEventosNataliOcampo.data.Repositorios;
 using MilestoneEventosNataliOcampo.web.Models;
 using System.Diagnostics;
 using System.Security.Claims;
-using System.Xml.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+
 
 
 namespace MilestoneEventosNataliOcampo.web.Controllers
@@ -14,32 +13,35 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
     public class TurnosController : Controller
     {
         private ITurnoRepository _turnoRepository;
-        private IUsuarioRepository _usuarioRepository;
-
+      
         public TurnosController(ITurnoRepository turnoRepository)
         {
 
             _turnoRepository = turnoRepository;
         }
-        //mostrar-index
+        //mostrar-index- solo del usuario logieado 
         public ActionResult Index()
         {
+            //Validacion solo de quien es el turno 
+            if (!int.TryParse(User.FindFirstValue("Id"), out int usuarioId))
+            {
+                return RedirectToAction("Index", "Home");
+            }
 
-            ViewBag.Mensaje = "Inicio";
+            var turnoBD = _turnoRepository.ObtenerTurnos()
+                .Where(t => !t.Borrado
+                    && (t.Paciente.UsuarioId == usuarioId || t.Medico.UsuarioId == usuarioId))
+                .ToList();
 
-            List<TurnosVM> Turnos = new List<TurnosVM>();
-            //agreagr return en interface
-            var turnosddbb = _turnoRepository.ObtenerTurnos();
-
-            turnosddbb = turnosddbb.Where(t => t.Borrado == false).ToList();
-
-            Turnos = turnosddbb.Select(t => new TurnosVM
+            List<TurnosVM> Turnos = turnoBD.Select(t => new TurnosVM
             {
                 CodigoTurno = t.CodigoTurno,
                 FechaTurno = t.FechaTurno,
-                Paciente = new PacienteVM { Nombre = t.Paciente.Nombre, Apellido = t.Paciente.Apellido, DNI = t.Paciente.DNI }
-                ,
-                Especialidad = t.Especialidad.Nombre
+                HoraTurno = t.HoraTurno,
+                Paciente = new PacienteVM { Nombre = t.Paciente.Nombre, Apellido = t.Paciente.Apellido, DNI = t.Paciente.DNI } ,
+                Especialidad = t.Especialidad.Nombre,
+                Medico = t.Medico.Nombre
+
             }).ToList();
             return View(Turnos);
         }
@@ -47,36 +49,43 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
         //detail 
         public ActionResult Details(int CodigoTurno)
         {
-
-            TurnosVM turno = null;
-
-            var turnosddbb = _turnoRepository.ObtenerTurnoId(CodigoTurno);
-
-            turno = new TurnosVM
+            if (!int.TryParse(User.FindFirstValue("Id"), out int usuarioId))
             {
-                CodigoTurno = turnosddbb.CodigoTurno,
-                Paciente = new PacienteVM { Nombre = turnosddbb.Paciente.Nombre, Apellido = turnosddbb.Paciente.Apellido, DNI = turnosddbb.Paciente.DNI },
-                FechaTurno = turnosddbb.FechaTurno,
-                Especialidad = turnosddbb.Especialidad.Nombre
+                return RedirectToAction("Index", "Home");
+            }
+
+            var turnoBD = _turnoRepository.ObtenerTurnoId(CodigoTurno);
+            if (turnoBD == null) { return NotFound(); }
+
+            // solo el paciente o medico asignado
+            bool esPaciente = turnoBD.Paciente.UsuarioId == usuarioId;
+            bool esMedico = turnoBD.Medico.UsuarioId == usuarioId;
+            if (!esPaciente && !esMedico) { return Forbid(); }
+
+
+            var turnoVM = new TurnosVM
+            {
+                CodigoTurno = turnoBD.CodigoTurno,
+                Paciente = new PacienteVM { Nombre = turnoBD.Paciente.Nombre, Apellido = turnoBD.Paciente.Apellido, DNI = turnoBD.Paciente.DNI },
+                FechaTurno = turnoBD.FechaTurno,
+                HoraTurno = turnoBD.HoraTurno,
+                Especialidad = turnoBD.Especialidad.Nombre,
+                Medico = turnoBD.Medico.Nombre
             };
 
-            return View(turno);
+            return View(turnoVM);
         }
 
 
         //crear  get 
         public ActionResult Create()
         {
+            if (!int.TryParse(User.FindFirstValue("Id"), out int usuarioId))
+            {
+                return RedirectToAction("Index", "Home");
+            }
             TurnoAltaVM turno = new TurnoAltaVM();
-            turno.Especialidades = _turnoRepository.ObtenerEspecialidades()
-              .Select(e => new SelectListItem(e.Nombre, e.Id.ToString()))
-              .ToList();
-
-            turno.Horarios = _turnoRepository.Horarios()
-            .Select(h => new SelectListItem(h.ToString("HH:mm"), h.ToString("HH:mm")))
-            .ToList();
-
-            //devuelve a la vista la fecha de hoy 
+            CargarSelector(turno, usuarioId);
             turno.FechaTurno = DateTime.Today;
 
             return View(turno);
@@ -96,7 +105,7 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
             var paciente = _turnoRepository.BuscarPacienteXusuario(usuarioId);
             ViewBag.PacienteExiste = paciente != null;
             ViewBag.PacienteNombre = paciente != null ? $"{paciente.Nombre} {paciente.Apellido}" : null;
-        
+
         }
 
 
@@ -113,7 +122,7 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
 
             Paciente? paciente = _turnoRepository.BuscarPacienteXusuario(usuarioId);
 
-            if (paciente!= null)
+            if (paciente != null)
             {
                 ModelState.Remove("Paciente.Nombre");
                 ModelState.Remove("Paciente.Apellido");
@@ -157,7 +166,8 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
             {
                 if (paciente == null)
                 {
-                     paciente = new Paciente {
+                    paciente = new Paciente
+                    {
                         Nombre = turnoNuevo.Paciente.Nombre,
                         Apellido = turnoNuevo.Paciente.Apellido,
                         DNI = turnoNuevo.Paciente.DNI,
@@ -175,14 +185,14 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
                     PacienteId = paciente.Id,
                     MedicoId = medico.Id
                 };
-                
+
                 _turnoRepository.AgregarTurno(turno);
 
                 TempData["Mensaje"] = "Turno creado con exito";
                 return RedirectToAction(nameof(Index));
 
             }
-            catch  ( Exception ex)
+            catch (Exception ex)
             {
                 ModelState.AddModelError("", "No se pudo crear el turno. Intentá de nuevo.");
                 CargarSelector(turnoNuevo, usuarioId);
@@ -194,89 +204,159 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
 
         // modificar 
         public ActionResult Edit(int CodigoTurno)
-{
-    var turnosddbb = _turnoRepository.ObtenerTurnoId(CodigoTurno);
-    TurnoAltaVM turnoModificar = new TurnoAltaVM
-    {
-        CodigoTurno = turnosddbb.CodigoTurno,
-        FechaTurno = turnosddbb.FechaTurno,
-        EspecialidadId = turnosddbb.EspecialidadId,
-        Paciente = new PacienteVM { Nombre = turnosddbb.Paciente.Nombre, Apellido = turnosddbb.Paciente.Apellido, DNI = turnosddbb.Paciente.DNI },
-        Especialidades = _turnoRepository.ObtenerEspecialidades()
-            .Select(e => new SelectListItem(e.Nombre, e.Id.ToString()))
-            .ToList()
-    };
+        {
 
-    return View(turnoModificar);
-}
+            if (!int.TryParse(User.FindFirstValue("Id"), out int usuarioId))
+            {
+                return RedirectToAction("Index", "Home");
+            }
 
-[HttpPost]
-[ValidateAntiForgeryToken]
+            var turnoBD = _turnoRepository.ObtenerTurnoId(CodigoTurno);
+            if (turnoBD == null) { return NotFound(); }
 
-public ActionResult Edit(int CodigoTurno, TurnoAltaVM turnoNuevo)
-{
+            // solo el paciente o medico asignado
+            bool esPaciente = turnoBD.Paciente.UsuarioId == usuarioId;
+            bool esMedico = turnoBD.Medico.UsuarioId == usuarioId;
+            if (!esPaciente && !esMedico) { return Forbid(); }
 
-    if (!ModelState.IsValid)
-    {
-        turnoNuevo.Especialidades = _turnoRepository.ObtenerEspecialidades()
-            .Select(e => new SelectListItem(e.Nombre, e.Id.ToString()))
-            .ToList();
+            TurnoAltaVM turnoModificar = new TurnoAltaVM
+            {
+                CodigoTurno = turnoBD.CodigoTurno,
+                FechaTurno = turnoBD.FechaTurno,
+                EspecialidadId = turnoBD.EspecialidadId,
+                Paciente = new PacienteVM { Nombre = turnoBD.Paciente.Nombre, Apellido = turnoBD.Paciente.Apellido, DNI = turnoBD.Paciente.DNI },
+                Especialidades = _turnoRepository.ObtenerEspecialidades()
+                    .Select(e => new SelectListItem(e.Nombre, e.Id.ToString()))
+                    .ToList()
+            };
+
+            return View(turnoModificar);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+
+        public ActionResult Edit(int CodigoTurno, TurnoAltaVM turnoNuevo)
+        {
+
+            if (!int.TryParse(User.FindFirstValue("Id"), out int usuarioId))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var turnoBD = _turnoRepository.ObtenerTurnoId(CodigoTurno);
+            if (turnoBD == null) { return NotFound(); }
+
+            // solo el paciente o medico asignado
+            bool esPaciente = turnoBD.Paciente.UsuarioId == usuarioId;
+            bool esMedico = turnoBD.Medico.UsuarioId == usuarioId;
+            if (!esPaciente && !esMedico) { return Forbid(); }
+
+            ModelState.Remove("Paciente.Nombre");
+            ModelState.Remove("Paciente.Apellido");
+            ModelState.Remove("Paciente.DNI");
+            if (!ModelState.IsValid)
+            {
+                CargarSelector(turnoNuevo, usuarioId);
+                ViewBag.Mensaje = "Error - debe completar los campos requeridos";
+                return View(turnoNuevo);
+            }
+            
+                
+            
+            try
+            {
+                turnoBD.FechaTurno = turnoNuevo.FechaTurno;
+                turnoBD.EspecialidadId = turnoNuevo.EspecialidadId;
+
+                _turnoRepository.Modificar(turnoBD);
+
+                TempData["Mensaje"] = "Turno modificado";
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                CargarSelector(turnoNuevo, usuarioId);
+                ModelState.AddModelError("", "No se pudo modificar el turno.");
+                return View(turnoNuevo);
+            }
+        }
+        //"eliminar"
+        [HttpGet]
+        public ActionResult Delete(int CodigoTurno)
+        {
+            if (!int.TryParse(User.FindFirstValue("Id"), out int usuarioId))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var turnoBD = _turnoRepository.ObtenerTurnoId(CodigoTurno);
+            if (turnoBD == null)
+            {
+                return NotFound();
+            }
+
+            // solo paciente o medico asignado
+            bool esPaciente = turnoBD.Paciente.UsuarioId == usuarioId;
+            bool esMedico = turnoBD.Medico.UsuarioId == usuarioId;
+            if (!esPaciente && !esMedico)
+            {
+                return Forbid();
+            }
+
+            TurnosVM turno = new TurnosVM
+            {
+                CodigoTurno = turnoBD.CodigoTurno,
+                FechaTurno = turnoBD.FechaTurno,
+                HoraTurno = turnoBD.HoraTurno,
+                Paciente = new PacienteVM
+                {
+                    Nombre = turnoBD.Paciente.Nombre,
+                    Apellido = turnoBD.Paciente.Apellido,
+                    DNI = turnoBD.Paciente.DNI
+                },
+                Especialidad = turnoBD.Especialidad.Nombre,
+                Medico = turnoBD.Medico.Nombre
+            };
+
+            return View(turno);
+        }
 
 
-        ViewBag.Mensaje = "Error - debe  completar los campos requeridos";
-        return View(turnoNuevo);
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(int CodigoTurno, IFormCollection collection)
+        {
+            if (!int.TryParse(User.FindFirstValue("Id"), out int usuarioId))
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var turnoBD = _turnoRepository.ObtenerTurnoId(CodigoTurno);
+            if (turnoBD == null)
+            {
+                return NotFound();
+            }
+
+            // solo paciente o medico asignado
+            bool esPaciente = turnoBD.Paciente.UsuarioId == usuarioId;
+            bool esMedico = turnoBD.Medico.UsuarioId == usuarioId;
+            if (!esPaciente && !esMedico)
+            {
+                return Forbid();
+            }
+
+            try
+            {
+                turnoBD.Borrado = true;
+                _turnoRepository.Modificar(turnoBD);
+
+                return RedirectToAction(nameof(Index));
+            }
+            catch
+            {
+                return RedirectToAction(nameof(Index));
+            }
+        }
     }
-
-    try
-    {
-        var turnoModificar = _turnoRepository.ObtenerTurnoId(CodigoTurno);
-
-        turnoModificar.FechaTurno = turnoNuevo.FechaTurno;
-        turnoModificar.EspecialidadId = turnoNuevo.EspecialidadId;
-
-        _turnoRepository.Modificar(turnoModificar);
-
-        TempData["Mensaje"] = "Turno modificado";
-        return RedirectToAction(nameof(Index));
-    }
-    catch
-    {
-        return View();
-    }
-}
-//"eliminar"
-public ActionResult Delete(int CodigoTurno)
-{
-    var turnosddbb = _turnoRepository.ObtenerTurnoId(CodigoTurno);
-    TurnosVM turno = new TurnosVM
-    {
-        CodigoTurno = turnosddbb.CodigoTurno,
-        FechaTurno = turnosddbb.FechaTurno,
-        Paciente = new PacienteVM { Nombre = turnosddbb.Paciente.Nombre, Apellido = turnosddbb.Paciente.Apellido, DNI = turnosddbb.Paciente.DNI }
-        ,
-        Especialidad = turnosddbb.Especialidad.Nombre
-    };
-
-    return View(turno);
-}
-
-
-[HttpPost]
-[ValidateAntiForgeryToken]
-public ActionResult Delete(int CodigoTurno, IFormCollection collection)
-{
-    try
-    {
-        var turnosddbb = _turnoRepository.ObtenerTurnoId(CodigoTurno);
-        turnosddbb.Borrado = true;
-        _turnoRepository.Modificar(turnosddbb);
-
-        return RedirectToAction(nameof(Index));
-    }
-    catch
-    {
-        return View();
-    }
-}
-    }   
 }
