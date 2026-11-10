@@ -73,7 +73,8 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
                 Medico = turnoBD.Medico.Nombre
             };
 
-            return View(turnoVM);
+           // return View(turnoVM);
+            return RedirectToAction(nameof(Details));
         }
 
 
@@ -122,12 +123,26 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
 
             Paciente? paciente = _turnoRepository.BuscarPacienteXusuario(usuarioId);
 
+            //if (paciente != null)
+            //{
+            //    ModelState.Remove("Paciente.Nombre");
+            //    ModelState.Remove("Paciente.Apellido");
+            //    ModelState.Remove("Paciente.DNI");
+            //}
             if (paciente != null)
             {
-                ModelState.Remove("Paciente.Nombre");
-                ModelState.Remove("Paciente.Apellido");
-                ModelState.Remove("Paciente.DNI");
+                var claves = ModelState.Keys
+                    .Where(k => k == "Paciente" || k.StartsWith("Paciente."))
+                    .ToList();
+
+                foreach (var k in claves)
+                    ModelState.Remove(k);
             }
+            else if (turnoNuevo.Paciente == null)
+            {
+                ModelState.AddModelError("Paciente", "Debe completar los datos del paciente.");
+            }
+
 
             if (!ModelState.IsValid)
             {
@@ -192,7 +207,7 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
                 return RedirectToAction(nameof(Index));
 
             }
-            catch (Exception ex)
+            catch 
             {
                 ModelState.AddModelError("", "No se pudo crear el turno. Intentá de nuevo.");
                 CargarSelector(turnoNuevo, usuarioId);

@@ -70,6 +70,7 @@ namespace MilestoneEventosNataliOcampo.data.Repositorios
             return _context.Turnos
           .Include(t => t.Paciente)
          .Include(t => t.Especialidad)
+         .Include(t =>t.Medico)
          .ToList();
         }
 
