@@ -13,34 +13,39 @@
 }
 
 <form asp-action="Create" method="post">
-	<div asp-validation-summary="All" ModelOnly" class="text-danger"></div>
+	<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 	@if (ViewBag.PacienteExiste != true)
-	{
-		<h5 class="mt-4">Datos del paciente</h5>
-		<div class="form-group">
-			<label asp-for="Paciente.Nombre" class="control-label"></label>
-			<input asp-for="Paciente.Nombre" class="form-control" />
-			<span asp-validation-for="Paciente.Nombre" class="text-danger"></span>
-		</div>
+		{
+			<h5 class="mt-4">Datos del paciente</h5>
+			<div class="form-group">
+				<label asp-for="Paciente.Nombre" class="control-label"></label>
+				<input asp-for="Paciente.Nombre" class="form-control" />
+				<span asp-validation-for="Paciente.Nombre" class="text-danger"></span>
+			</div>
 
-		<div class="form-group">
-			<label asp-for="Paciente.Apellido" class="control-label"></label>
-			<input asp-for="Paciente.Apellido" class="form-control" />
-			<span asp-validation-for="Paciente.Apellido" class="text-danger"></span>
-		</div>
+			<div class="form-group">
+				<label asp-for="Paciente.Apellido" class="control-label"></label>
+				<input asp-for="Paciente.Apellido" class="form-control" />
+				<span asp-validation-for="Paciente.Apellido" class="text-danger"></span>
+			</div>
 
+			<div class="form-group">
+				<label asp-for="Paciente.DNI" class="control-label"></label>
+				<input asp-for="Paciente.DNI" class="form-control" />
+				<span asp-validation-for="Paciente.DNI" class="text-danger"></span>
+			</div>
+		}
 		<div class="form-group">
-			<label asp-for="Paciente.DNI" class="control-label"></label>
-			<input asp-for="Paciente.DNI" class="form-control" />
-			<span asp-validation-for="Paciente.DNI" class="text-danger"></span>
-		</div>
 
-		<div class="form-group">
+		@if (ViewBag.PacienteExiste == true)
+		{
+			<p class="mb-3"><strong>Paciente:</strong> @ViewBag.PacienteNombre</p>
+		}
 			<label asp-for="FechaTurno" class="control-label"></label>
 			<input asp-for="FechaTurno" type="date" class="form-control" />
 			<span asp-validation-for="FechaTurno" class="text-danger"></span>
 		</div>
-	}
+	
 	@* selector de hora- turnos disponibles  *@
 	<div class="form-group">
 		<label asp-for="HoraTurno" class="control-label"></label>

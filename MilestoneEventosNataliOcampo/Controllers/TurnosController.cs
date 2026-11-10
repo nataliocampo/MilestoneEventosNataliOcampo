@@ -82,7 +82,7 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
             return View(turno);
         }
 
-        private void CargarSelector(TurnoAltaVM turnovm)
+        private void CargarSelector(TurnoAltaVM turnovm, int usuarioId)
         {
             turnovm.Especialidades = _turnoRepository.ObtenerEspecialidades()
                 .Select(e => new SelectListItem(e.Nombre, e.Id.ToString()))
@@ -91,6 +91,12 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
             turnovm.Horarios = _turnoRepository.Horarios()
                 .Select(h => new SelectListItem(h.ToString("HH:mm"), h.ToString("HH:mm")))
                 .ToList();
+
+            //traer id para cargar vistas
+            var paciente = _turnoRepository.BuscarPacienteXusuario(usuarioId);
+            ViewBag.PacienteExiste = paciente != null;
+            ViewBag.PacienteNombre = paciente != null ? $"{paciente.Nombre} {paciente.Apellido}" : null;
+        
         }
 
 
@@ -105,9 +111,9 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            Paciente? pacienteExistente = _turnoRepository.BuscarPacienteXusuario(usuarioId);
+            Paciente? paciente = _turnoRepository.BuscarPacienteXusuario(usuarioId);
 
-            if (pacienteExistente != null)
+            if (paciente!= null)
             {
                 ModelState.Remove("Paciente.Nombre");
                 ModelState.Remove("Paciente.Apellido");
@@ -116,7 +122,7 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
 
             if (!ModelState.IsValid)
             {
-                CargarSelector(turnoNuevo);
+                CargarSelector(turnoNuevo, usuarioId);
                 ViewBag.Mensaje = "Error - debe  completar los campos requeridos";
 
 
@@ -129,7 +135,7 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
                 ModelState.AddModelError(nameof(turnoNuevo.FechaTurno),
                     "No se puede elegir una fecha y hora anterior a la actual.");
 
-                CargarSelector(turnoNuevo);
+                CargarSelector(turnoNuevo, usuarioId);
 
                 return View(turnoNuevo);
             }
@@ -141,7 +147,7 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
             if (medico == null)
             {
                 ModelState.AddModelError("", "No hay médicos disponibles para esa especialidad, fecha y hora.");
-                CargarSelector(turnoNuevo);
+                CargarSelector(turnoNuevo, usuarioId);
                 return View(turnoNuevo);
             }
 
@@ -149,16 +155,16 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
 
             try
             {
-                if (pacienteExistente == null)
+                if (paciente == null)
                 {
-                    Paciente pacienteNuevo = new Paciente {
+                     paciente = new Paciente {
                         Nombre = turnoNuevo.Paciente.Nombre,
                         Apellido = turnoNuevo.Paciente.Apellido,
                         DNI = turnoNuevo.Paciente.DNI,
                         UsuarioId = usuarioId
                     };
 
-                    _turnoRepository.AgregarPaciente(pacienteNuevo);
+                    _turnoRepository.AgregarPaciente(paciente);
                 }
 
                 Turno turno = new Turno
@@ -166,6 +172,7 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
                     FechaTurno = turnoNuevo.FechaTurno,
                     EspecialidadId = turnoNuevo.EspecialidadId,
                     HoraTurno = turnoNuevo.HoraTurno,
+                    PacienteId = paciente.Id,
                     MedicoId = medico.Id
                 };
                 
@@ -175,10 +182,10 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
                 return RedirectToAction(nameof(Index));
 
             }
-            catch
+            catch  ( Exception ex)
             {
                 ModelState.AddModelError("", "No se pudo crear el turno. Intentá de nuevo.");
-                CargarSelector(turnoNuevo);
+                CargarSelector(turnoNuevo, usuarioId);
                 return View(turnoNuevo);
 
             }
