@@ -6,9 +6,10 @@
 
 <h1>Turnos</h1>
 
-<p>
-	<a asp-action="Create" class="btn btn-primary">Crear nuevo</a>
-</p>
+@if (User.HasClaim("Permiso", "Turnos.Crear"))
+{
+    <a asp-action="Create" class="btn btn-primary">Nuevo turno</a>
+}
 
 @if (Model == null || !Model.Any())
 {
@@ -22,6 +23,7 @@ else
 				<th>Código</th>
 				<th>Paciente</th>
 				<th>Fecha</th>
+				<th>Hora</th>
 				<th>Especialidad</th>
 				<th></th>
 			</tr>
@@ -32,13 +34,21 @@ else
 			<tr>
 				<td>@item.CodigoTurno</td>
 				<td>@(item.Paciente?.Nombre) @(" ") @(item.Paciente?.Apellido) (@item.Paciente?.DNI)</td>
-				<td>@item.FechaTurno.ToString("g")</td>
+				<td>@item.FechaTurno.ToString("d")</td>
+				<td>@item.HoraTurno.ToString("HH:mm")</td>
 				<td>@item.Especialidad</td>
 				<td>
-					<a asp-action="Details" asp-route-CodigoTurno="@item.CodigoTurno">Detalles</a> |
-					<a asp-action="Edit" asp-route-CodigoTurno="@item.CodigoTurno">Editar</a> |
-					<a asp-action="Delete" asp-route-CodigoTurno="@item.CodigoTurno">Eliminar</a>
-				</td>
+							
+						@if (User.HasClaim("Permiso", "Turnos.Editar"))
+						{
+							<a asp-action="Edit" asp-route-CodigoTurno="@item.CodigoTurno">Editar</a>
+						}
+						@if (User.HasClaim("Permiso", "Turnos.Eliminar"))
+						{
+							<a asp-action="Delete" asp-route-CodigoTurno="@item.CodigoTurno">Cancelar</a>
+						}
+						<a asp-action="Details" asp-route-CodigoTurno="@item.CodigoTurno">Detalle</a>
+					</td>
 			</tr>
 		}
 		</tbody>

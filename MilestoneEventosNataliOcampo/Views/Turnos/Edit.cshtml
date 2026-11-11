@@ -15,29 +15,19 @@
 	<div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
 	<input asp-for="CodigoTurno" type="hidden" />
-
-	<div class="form-group">
-		<label asp-for="Paciente.Nombre" class="control-label"></label>
-		<input asp-for="Paciente.Nombre" class="form-control" />
-		<span asp-validation-for="Paciente.Nombre" class="text-danger"></span>
-	</div>
-
-	<div class="form-group">
-		<label asp-for="Paciente.Apellido" class="control-label"></label>
-		<input asp-for="Paciente.Apellido" class="form-control" />
-		<span asp-validation-for="Paciente.Apellido" class="text-danger"></span>
-	</div>
-
-	<div class="form-group">
-		<label asp-for="Paciente.DNI" class="control-label"></label>
-		<input asp-for="Paciente.DNI" class="form-control" />
-		<span asp-validation-for="Paciente.DNI" class="text-danger"></span>
-	</div>
+	
 
 	<div class="form-group">
 		<label asp-for="FechaTurno" class="control-label"></label>
-		<input asp-for="FechaTurno" class="form-control" />
+		<input asp-for="FechaTurno" type="date" asp-format="{0:yyyy-dd-MM}" class="form-control" />
 		<span asp-validation-for="FechaTurno" class="text-danger"></span>
+	</div>
+	<div class="form-group">
+		<label asp-for="HoraTurno" class="control-label"></label>
+	<select asp-for="HoraTurno" asp-items="Model.Horarios" class="form-control">
+	<option value="">-- Seleccione --</option>
+		</select>
+		<span asp-validation-for="HoraTurno" class="text-danger"></span>
 	</div>
 
 	<div class="form-group">

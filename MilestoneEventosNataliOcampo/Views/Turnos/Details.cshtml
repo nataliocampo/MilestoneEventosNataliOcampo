@@ -33,7 +33,7 @@
 			Fecha
 		</dt>
 		<dd class = "col-sm-10">
-			@Model.FechaTurno.ToString("g")
+			@Model.FechaTurno.ToString("d")
 		</dd>
 		
 		<dt class="col-sm-2">Hora</dt>
@@ -51,11 +51,11 @@
 	</dl>
 
 	<p>
-	@if (User.HasClaim("Permiso", "EditarTurno"))
+	@if (User.HasClaim("Permiso", "Turno.Editar"))
 	{
 		<a asp-action="Edit" asp-route-CodigoTurno="@Model.CodigoTurno" class="btn btn-primary">Editar</a>
 	}
-	@if (User.HasClaim("Permiso", "EliminarTurno"))
+	@if (User.HasClaim("Permiso", "Turno.Eliminar"))
 	{
 		<a asp-action="Delete" asp-route-CodigoTurno="@Model.CodigoTurno" class="btn btn-danger">Eliminar</a>
 	}

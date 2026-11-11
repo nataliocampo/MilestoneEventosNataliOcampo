@@ -73,8 +73,9 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
                 Medico = turnoBD.Medico.Nombre
             };
 
-           // return View(turnoVM);
-            return RedirectToAction(nameof(Details));
+           
+            return View(turnoVM);
+           
         }
 
 
@@ -219,9 +220,13 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
             {
                 return RedirectToAction("Index", "Home");
             }
+            if (!User.HasClaim("Permiso", "Turnos.Editar")) { return Forbid(); }
+
+      
 
             var turnoBD = _turnoRepository.ObtenerTurnoId(CodigoTurno);
             if (turnoBD == null) { return NotFound(); }
+
 
             // solo el paciente o medico asignado
             bool esPaciente = turnoBD.Paciente.UsuarioId == usuarioId;
@@ -234,12 +239,16 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
                 FechaTurno = turnoBD.FechaTurno,
                 EspecialidadId = turnoBD.EspecialidadId,
                 Paciente = new PacienteVM { Nombre = turnoBD.Paciente.Nombre, Apellido = turnoBD.Paciente.Apellido, DNI = turnoBD.Paciente.DNI },
-                Especialidades = _turnoRepository.ObtenerEspecialidades()
-                    .Select(e => new SelectListItem(e.Nombre, e.Id.ToString()))
-                    .ToList()
+                
             };
 
+            CargarSelector(turnoModificar, usuarioId);
+            string horaActual = turnoBD.HoraTurno.ToString("HH:mm");
+            foreach (var h in turnoModificar.Horarios)
+                h.Selected = h.Value == horaActual;
+
             return View(turnoModificar);
+           
         }
 
         [HttpPost]
@@ -264,6 +273,16 @@ namespace MilestoneEventosNataliOcampo.web.Controllers
             ModelState.Remove("Paciente.Nombre");
             ModelState.Remove("Paciente.Apellido");
             ModelState.Remove("Paciente.DNI");
+
+            var claves = ModelState.Keys
+            .Where(k => k == "Paciente" || k.StartsWith("Paciente."))
+            .ToList();
+
+            foreach (var k in claves)
+            {
+                ModelState.Remove(k);
+            }
+
             if (!ModelState.IsValid)
             {
                 CargarSelector(turnoNuevo, usuarioId);

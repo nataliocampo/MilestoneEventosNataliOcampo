@@ -3,24 +3,13 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
+    <h1 class="display-4">Gestion de turnos</h1>
 </div>
 
 @if (User.Identity.IsAuthenticated)
 {
     <h3>Hola @User.Identity.Name</h3>
-    <ul>
-        @foreach (var claim in User.Claims)
-        {
-            if (claim.Type == "Permiso")
-            {
-                <li>@claim.Value</li>
-            }
-        }
-    </ul>
-    <a asp-action="Logout" asp-controller="Login">Cerrar Sesión</a>
+    
+   
 }
-else
-{
-    <a asp-action="Login" asp-controller="Login">Iniciar Sesión</a>
-}
+
